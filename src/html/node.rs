@@ -4,7 +4,7 @@ use element::ElementInner;
 
 use std::{cell::RefCell, rc::Rc};
 
-use super::{HTMLNodeBase, HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT};
+use super::{HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT};
 
 pub enum HTMLNode {
     Text(Rc<RefCell<TextInner>>),

@@ -59,6 +59,7 @@ impl GeneralAttributeBuilder {
 
 pub trait GeneralAttributeBuilderT: Sized {
     fn as_general_attribute_builder_mut(&mut self) -> &mut GeneralAttributeBuilder;
+
     fn add_class(mut self, class: &str) -> Self {
         self.as_general_attribute_builder_mut()
             .gen_attr
@@ -123,26 +124,6 @@ impl GeneralAttribute {
         }
 
         return res;
-    }
-}
-
-impl GeneralAttributeT for ElementInner {
-    fn general_attr(&self) -> &GeneralAttribute {
-        match self {
-            Self::Anchor(anchor_element_inner) => &anchor_element_inner.general_attr,
-            _ => {
-                unimplemented!("")
-            }
-        }
-    }
-
-    fn general_attr_mut(&mut self) -> &mut GeneralAttribute {
-        match self {
-            Self::Anchor(anchor_element_inner) => &mut anchor_element_inner.general_attr,
-            _ => {
-                unimplemented!("")
-            }
-        }
     }
 }
 

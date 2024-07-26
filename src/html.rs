@@ -26,38 +26,60 @@ pub enum NodeError {
     SameNodeCompare,
     #[error("cannot add ancestor to descendant node")]
     AddAncestorToDescendant,
+    #[error("cannot add to leaf node")]
+    AddToLeaf,
+}
+
+fn is_ancestor_of_impl(
+    me: &Rc<RefCell<dyn HTMLNodeInnerT>>,
+    descendant: &Rc<RefCell<dyn HTMLNodeInnerT>>,
+) -> Result<bool, NodeError> {
+    if let Some(descendant_parent_weak) = &descendant.borrow().as_html_node_inner().parent {
+        if let Some(descendant_parent_ptr) = descendant_parent_weak.upgrade() {
+            if Rc::ptr_eq(me, &descendant_parent_ptr) {
+                return Ok(true);
+            } else {
+                is_ancestor_of_impl(me, &descendant_parent_ptr)
+            }
+        } else {
+            Err(NodeError::GetParentPtr)
+        }
+    } else {
+        return Ok(false);
+    }
+}
+
+fn remove_child_impl(
+    me: &Rc<RefCell<dyn HTMLNodeInnerT>>,
+    target: &Rc<RefCell<dyn HTMLNodeInnerT>>,
+) -> Result<(), NodeError> {
+    let mut idx = None;
+    for (i, my_child) in me.borrow().as_html_node_inner().children.iter().enumerate() {
+        if Rc::ptr_eq(target, my_child) {
+            idx = Some(i);
+            break;
+        }
+    }
+
+    // Step 2: If the target child is found, remove it
+    if let Some(idx) = idx {
+        me.borrow_mut()
+            .as_html_node_inner_mut()
+            .children
+            .remove(idx);
+        Ok(())
+    } else {
+        Err(NodeError::NotChild)
+    }
 }
 
 pub trait HTMLNodeT {
     fn inner_ptr(&self) -> Rc<RefCell<dyn HTMLNodeInnerT>>;
+
     fn remove_child(&self, child: &impl HTMLNodeT) -> Result<(), NodeError> {
         let me = self.inner_ptr();
         let child_ptr = child.inner_ptr();
-        Self::remove_child_impl(&me, &child_ptr)
-    }
-
-    fn remove_child_impl(
-        me: &Rc<RefCell<dyn HTMLNodeInnerT>>,
-        target: &Rc<RefCell<dyn HTMLNodeInnerT>>,
-    ) -> Result<(), NodeError> {
-        let mut idx = None;
-        for (i, my_child) in me.borrow().as_html_node_inner().children.iter().enumerate() {
-            if Rc::ptr_eq(target, my_child) {
-                idx = Some(i);
-                break;
-            }
-        }
-
-        // Step 2: If the target child is found, remove it
-        if let Some(idx) = idx {
-            me.borrow_mut()
-                .as_html_node_inner_mut()
-                .children
-                .remove(idx);
-            Ok(())
-        } else {
-            Err(NodeError::NotChild)
-        }
+        remove_child_impl(&me, &child_ptr)
     }
 
     fn is_ancestor_of(&self, descendant: &impl HTMLNodeT) -> Result<bool, NodeError> {
@@ -68,26 +90,7 @@ pub trait HTMLNodeT {
             return Err(NodeError::SameNodeCompare);
         }
 
-        Self::is_ancestor_of_impl(&me, &descendant_ptr)
-    }
-
-    fn is_ancestor_of_impl(
-        me: &Rc<RefCell<dyn HTMLNodeInnerT>>,
-        descendant: &Rc<RefCell<dyn HTMLNodeInnerT>>,
-    ) -> Result<bool, NodeError> {
-        if let Some(descendant_parent_weak) = &descendant.borrow().as_html_node_inner().parent {
-            if let Some(descendant_parent_ptr) = descendant_parent_weak.upgrade() {
-                if Rc::ptr_eq(me, &descendant_parent_ptr) {
-                    return Ok(true);
-                } else {
-                    Self::is_ancestor_of_impl(me, &descendant_parent_ptr)
-                }
-            } else {
-                Err(NodeError::GetParentPtr)
-            }
-        } else {
-            return Ok(false);
-        }
+        is_ancestor_of_impl(&me, &descendant_ptr)
     }
 
     fn is_descendant_of(&self, ancestor: &impl HTMLNodeT) -> Result<bool, NodeError> {
@@ -97,10 +100,13 @@ pub trait HTMLNodeT {
             return Err(NodeError::SameNodeCompare);
         }
 
-        Self::is_ancestor_of_impl(&ancestor_ptr, &me)
+        is_ancestor_of_impl(&ancestor_ptr, &me)
     }
 
     fn add_child(&self, node: &impl HTMLNodeT) -> Result<(), NodeError> {
+        if self.inner_ptr().borrow().as_html_node_inner().leaf {
+            return Err(NodeError::AddToLeaf);
+        }
         let is_descendant_res = self.is_descendant_of(node);
         if let Err(err) = is_descendant_res {
             return Err(err);
@@ -115,7 +121,7 @@ pub trait HTMLNodeT {
 
         if let Some(node_parent_weak) = &you.borrow().as_html_node_inner().parent {
             if let Some(node_parent_ptr) = node_parent_weak.upgrade() {
-                if let Err(err) = Self::remove_child_impl(&node_parent_ptr, &you) {
+                if let Err(err) = remove_child_impl(&node_parent_ptr, &you) {
                     return Err(err);
                 }
             } else {

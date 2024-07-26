@@ -5,9 +5,9 @@ use crate::html::{node::HTMLNode, HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT};
 use super::{ElementInner, GeneralAttribute, GeneralAttributeBuilder, GeneralAttributeBuilderT};
 
 pub struct AnchorElementInner {
-    pub html_node_base: HTMLNodeBaseInner,
+    html_node_base: HTMLNodeBaseInner,
     href: Option<String>,
-    pub general_attr: GeneralAttribute,
+    general_attr: GeneralAttribute,
 }
 
 impl AnchorElementInner {}
@@ -70,7 +70,7 @@ impl AnchorBuilder {
 
     pub fn build(self) -> HTMLNode {
         let (href, content, gen_attr) = (self.href, self.content, self.gen_attr_builder.build());
-        let mut res = HTMLNode::Element(Rc::new(RefCell::new(ElementInner::Anchor(
+        let res = HTMLNode::Element(Rc::new(RefCell::new(ElementInner::Anchor(
             AnchorElementInner {
                 html_node_base: HTMLNodeBaseInner {
                     parent: None,
