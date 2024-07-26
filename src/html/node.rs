@@ -1,4 +1,4 @@
-mod element;
+pub mod element;
 
 use element::ElementInner;
 
@@ -6,7 +6,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use super::{HTMLNodeBase, HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT};
 
-enum HTMLNode {
+pub enum HTMLNode {
     Text(Rc<RefCell<TextInner>>),
     Element(Rc<RefCell<ElementInner>>),
 }
@@ -43,5 +43,18 @@ impl HTMLNodeInnerT for TextInner {
 
     fn render(&self) -> String {
         self.content.clone()
+    }
+}
+
+impl HTMLNode {
+    pub fn create_text(content: &str) -> Self {
+        Self::Text(Rc::new(RefCell::new(TextInner {
+            html_node_base: HTMLNodeBaseInner {
+                parent: None,
+                children: vec![],
+                leaf: true,
+            },
+            content: String::from(content),
+        })))
     }
 }

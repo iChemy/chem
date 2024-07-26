@@ -4,7 +4,7 @@ use std::{
     rc::{Rc, Weak},
 };
 
-mod node;
+pub mod node;
 
 struct HTMLNodeBase {
     ptr: Rc<RefCell<HTMLNodeBaseInner>>,
@@ -17,7 +17,7 @@ struct HTMLNodeBaseInner {
 }
 
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
-enum NodeError {
+pub enum NodeError {
     #[error("failed to get parent pointer")]
     GetParentPtr,
     #[error("node is not child")]
@@ -28,7 +28,7 @@ enum NodeError {
     AddAncestorToDescendant,
 }
 
-trait HTMLNodeT {
+pub trait HTMLNodeT {
     fn inner_ptr(&self) -> Rc<RefCell<dyn HTMLNodeInnerT>>;
     fn remove_child(&self, child: &impl HTMLNodeT) -> Result<(), NodeError> {
         let me = self.inner_ptr();

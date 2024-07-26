@@ -4,7 +4,7 @@ use anchor::AnchorElementInner;
 
 use crate::html::HTMLNodeInnerT;
 
-mod anchor;
+pub mod anchor;
 
 pub enum ElementInner {
     Anchor(AnchorElementInner),
@@ -57,7 +57,7 @@ impl GeneralAttributeBuilder {
     }
 }
 
-trait GeneralAttributeBuilderT: Sized {
+pub trait GeneralAttributeBuilderT: Sized {
     fn as_general_attribute_builder_mut(&mut self) -> &mut GeneralAttributeBuilder;
     fn add_class(mut self, class: &str) -> Self {
         self.as_general_attribute_builder_mut()

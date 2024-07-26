@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::html::{node::HTMLNode, HTMLNodeBaseInner, HTMLNodeInnerT};
+use crate::html::{node::HTMLNode, HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT};
 
 use super::{ElementInner, GeneralAttribute, GeneralAttributeBuilder, GeneralAttributeBuilderT};
 
@@ -43,28 +43,34 @@ impl HTMLNodeInnerT for AnchorElementInner {
 }
 
 #[derive(Default)]
-struct AnchorBuilder {
+pub struct AnchorBuilder {
     href: Option<String>,
+    content: Option<String>,
     gen_attr_builder: GeneralAttributeBuilder,
 }
 
 impl AnchorBuilder {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             href: None,
+            content: None,
             gen_attr_builder: GeneralAttributeBuilder::new(),
         }
     }
 
-    fn set_href(mut self, href: &str) -> Self {
+    pub fn set_content(mut self, content: &str) -> Self {
+        self.content = Some(String::from(content));
+        self
+    }
+
+    pub fn set_href(mut self, href: &str) -> Self {
         self.href = Some(String::from(href));
         self
     }
 
-    fn build(self) -> HTMLNode {
-        let (href, gen_attr) = (self.href, self.gen_attr_builder.build());
-
-        HTMLNode::Element(Rc::new(RefCell::new(ElementInner::Anchor(
+    pub fn build(self) -> HTMLNode {
+        let (href, content, gen_attr) = (self.href, self.content, self.gen_attr_builder.build());
+        let mut res = HTMLNode::Element(Rc::new(RefCell::new(ElementInner::Anchor(
             AnchorElementInner {
                 html_node_base: HTMLNodeBaseInner {
                     parent: None,
@@ -74,7 +80,14 @@ impl AnchorBuilder {
                 href: href,
                 general_attr: gen_attr,
             },
-        ))))
+        ))));
+
+        if let Some(content) = &content {
+            let text = HTMLNode::create_text(content);
+            let _ = res.add_child(&text);
+        }
+
+        return res;
     }
 }
 
@@ -106,6 +119,11 @@ mod tests {
             .build();
 
         assert!(anchor_1.add_child(&anchor_2).is_ok());
-        assert_eq!(anchor_1.render(), String::from(r##"<a href="/page1" class="class1 class2 " id="id_1"><a href="#me" id="id_2" data-role="button"></a></a>"##));
+        assert_eq!(
+            anchor_1.render(),
+            String::from(
+                r##"<a href="/page1" class="class1 class2 " id="id_1"><a href="#me" id="id_2" data-role="button"></a></a>"##
+            )
+        );
     }
 }
