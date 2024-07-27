@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use anchor::AnchorElementInner;
 
-use crate::html::HTMLNodeInnerT;
+use crate::html::{html_impl::HTMLNodeInnerTImpl, HTMLNodeInnerT};
 
 pub mod anchor;
 
@@ -35,25 +35,6 @@ impl GeneralAttributeBuilder {
 
     fn build(self) -> GeneralAttribute {
         self.gen_attr
-    }
-
-    fn add_class(mut self, class: &str) -> Self {
-        self.gen_attr.class.push(String::from(class));
-
-        self
-    }
-
-    fn set_id(mut self, id: &str) -> Self {
-        self.gen_attr.id = Some(String::from(id));
-
-        self
-    }
-
-    fn add_data_attr(mut self, key: &str, val: &str) -> Self {
-        self.gen_attr
-            .data
-            .insert(String::from(key), String::from(val));
-        self
     }
 }
 
@@ -127,7 +108,7 @@ impl GeneralAttribute {
     }
 }
 
-impl HTMLNodeInnerT for ElementInner {
+impl HTMLNodeInnerTImpl for ElementInner {
     fn as_html_node_inner(&self) -> &crate::html::HTMLNodeBaseInner {
         match self {
             Self::Anchor(anchor_element_inner) => anchor_element_inner.as_html_node_inner(),
@@ -140,10 +121,10 @@ impl HTMLNodeInnerT for ElementInner {
         }
     }
 
-    fn render(&self) -> String {
+    fn inner_render_impl(&self) -> String {
         match self {
             Self::Anchor(anchor_element_inner) => {
-                return anchor_element_inner.render();
+                return anchor_element_inner.inner_render_impl();
             }
 
             _ => {
@@ -152,3 +133,5 @@ impl HTMLNodeInnerT for ElementInner {
         }
     }
 }
+
+impl HTMLNodeInnerT for ElementInner {}

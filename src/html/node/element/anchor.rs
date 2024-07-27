@@ -1,6 +1,8 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::html::{node::HTMLNode, HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT};
+use crate::html::{
+    html_impl::HTMLNodeInnerTImpl, node::HTMLNode, HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT,
+};
 
 use super::{ElementInner, GeneralAttribute, GeneralAttributeBuilder, GeneralAttributeBuilderT};
 
@@ -12,7 +14,9 @@ pub struct AnchorElementInner {
 
 impl AnchorElementInner {}
 
-impl HTMLNodeInnerT for AnchorElementInner {
+impl HTMLNodeInnerT for AnchorElementInner {}
+
+impl HTMLNodeInnerTImpl for AnchorElementInner {
     fn as_html_node_inner(&self) -> &HTMLNodeBaseInner {
         &self.html_node_base
     }
@@ -21,7 +25,7 @@ impl HTMLNodeInnerT for AnchorElementInner {
         &mut self.html_node_base
     }
 
-    fn render(&self) -> String {
+    fn inner_render_impl(&self) -> String {
         let mut res = String::from("<a");
 
         if let Some(href_val) = &self.href {
@@ -33,7 +37,7 @@ impl HTMLNodeInnerT for AnchorElementInner {
         res.push('>');
 
         for child in (&self.as_html_node_inner().children).into_iter() {
-            res.push_str(&child.borrow().render());
+            res.push_str(&child.borrow().inner_render());
         }
 
         res.push_str("</a>");

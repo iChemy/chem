@@ -4,19 +4,21 @@ use element::ElementInner;
 
 use std::{cell::RefCell, rc::Rc};
 
-use super::{HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT};
+use super::{
+    html_impl::{HTMLNodeInnerTImpl, HTMLNodeTImpl},
+    HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT,
+};
 
 pub enum HTMLNode {
     Text(Rc<RefCell<TextInner>>),
     Element(Rc<RefCell<ElementInner>>),
 }
-
 struct TextInner {
     html_node_base: HTMLNodeBaseInner,
     content: String,
 }
 
-impl HTMLNodeT for HTMLNode {
+impl HTMLNodeTImpl for HTMLNode {
     fn inner_ptr(&self) -> Rc<RefCell<dyn HTMLNodeInnerT>> {
         match self {
             HTMLNode::Text(tect_inner) => {
@@ -32,7 +34,9 @@ impl HTMLNodeT for HTMLNode {
     }
 }
 
-impl HTMLNodeInnerT for TextInner {
+impl HTMLNodeT for HTMLNode {}
+
+impl HTMLNodeInnerTImpl for TextInner {
     fn as_html_node_inner(&self) -> &HTMLNodeBaseInner {
         &self.html_node_base
     }
@@ -41,10 +45,12 @@ impl HTMLNodeInnerT for TextInner {
         &mut self.html_node_base
     }
 
-    fn render(&self) -> String {
+    fn inner_render_impl(&self) -> String {
         self.content.clone()
     }
 }
+
+impl HTMLNodeInnerT for TextInner {}
 
 impl HTMLNode {
     pub fn create_text(content: &str) -> Self {
