@@ -1,21 +1,17 @@
 pub mod element;
 
+pub mod text;
+
 use element::ElementInner;
+use text::{create_text_impl, TextInner};
 
 use std::{cell::RefCell, rc::Rc};
 
-use super::{
-    html_impl::{HTMLNodeInnerTImpl, HTMLNodeTImpl},
-    HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT,
-};
+use super::{html_impl::HTMLNodeTImpl, HTMLNodeInnerT};
 
 pub enum HTMLNode {
     Text(Rc<RefCell<TextInner>>),
     Element(Rc<RefCell<ElementInner>>),
-}
-struct TextInner {
-    html_node_base: HTMLNodeBaseInner,
-    content: String,
 }
 
 impl HTMLNodeTImpl for HTMLNode {
@@ -34,33 +30,8 @@ impl HTMLNodeTImpl for HTMLNode {
     }
 }
 
-impl HTMLNodeT for HTMLNode {}
-
-impl HTMLNodeInnerTImpl for TextInner {
-    fn as_html_node_inner(&self) -> &HTMLNodeBaseInner {
-        &self.html_node_base
-    }
-
-    fn as_html_node_inner_mut(&mut self) -> &mut HTMLNodeBaseInner {
-        &mut self.html_node_base
-    }
-
-    fn inner_render_impl(&self) -> String {
-        self.content.clone()
-    }
-}
-
-impl HTMLNodeInnerT for TextInner {}
-
 impl HTMLNode {
     pub fn create_text(content: &str) -> Self {
-        Self::Text(Rc::new(RefCell::new(TextInner {
-            html_node_base: HTMLNodeBaseInner {
-                parent: None,
-                children: vec![],
-                leaf: true,
-            },
-            content: String::from(content),
-        })))
+        create_text_impl(content)
     }
 }
