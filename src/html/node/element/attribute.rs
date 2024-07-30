@@ -51,3 +51,26 @@ impl AttributeBase {
         return res;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::AttributeBase;
+
+    #[test]
+    fn test_attribute() {
+        let mut attribute = AttributeBase::default();
+        attribute.class.push(String::from("class1"));
+        attribute.class.push(String::from("class2"));
+
+        attribute.id = Some(String::from("id1"));
+
+        attribute
+            .data
+            .insert(String::from("role"), String::from("button"));
+
+        assert_eq!(
+            attribute.render_attr_base(),
+            String::from(r#" class="class1 class2 " id="id1" data-role="button""#)
+        );
+    }
+}
