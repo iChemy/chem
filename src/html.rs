@@ -126,6 +126,16 @@ mod html_private {
         pub children: Vec<Rc<RefCell<dyn HTMLNodeInnerT>>>,
         pub leaf: bool,
     }
+
+    impl Default for HTMLNodeBaseInner {
+        fn default() -> Self {
+            HTMLNodeBaseInner {
+                parent: None,
+                children: vec![],
+                leaf: false,
+            }
+        }
+    }
 }
 pub trait HTMLNodeT: HTMLNodeTImpl {
     fn is_ancestor_of(&self, descendant: &impl HTMLNodeT) -> Result<bool, NodeError> {

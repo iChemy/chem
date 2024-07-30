@@ -4,5 +4,7 @@ use chem::{
 };
 fn main() {
     let text = HTMLNode::create_text("text");
-    println!("{}", text.render());
+    let anchor = HTMLNode::create_anchor(Some("hello, world"), Some("/about"));
+    anchor.add_child(&text).expect("");
+    println!("{}", anchor.render());
 }
