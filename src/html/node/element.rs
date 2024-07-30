@@ -28,9 +28,9 @@ impl HTMLNodeInnerT for ElementInner {
                 return anchor_element_inner.inner_render();
             }
 
-            _ => {
-                unimplemented!("")
-            }
+            // _ => {
+            //     unimplemented!("")
+            // }
         }
     }
 }

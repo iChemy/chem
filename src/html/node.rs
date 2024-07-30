@@ -23,9 +23,9 @@ impl HTMLNodeTImpl for HTMLNode {
             HTMLNode::Element(element_inner) => {
                 return element_inner.clone();
             }
-            _ => {
-                unimplemented!("")
-            }
+            // _ => {
+            //     unimplemented!("")
+            // }
         }
     }
 }
