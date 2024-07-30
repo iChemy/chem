@@ -27,10 +27,6 @@ impl HTMLNodeInnerT for ElementInner {
             Self::Anchor(anchor_element_inner) => {
                 return anchor_element_inner.inner_render();
             }
-
-            // _ => {
-            //     unimplemented!("")
-            // }
         }
     }
 }
