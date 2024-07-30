@@ -1,4 +1,9 @@
-use crate::html::{HTMLNodeBaseInner, HTMLNodeInnerT};
+use std::{cell::RefCell, rc::Rc};
+
+use crate::html::{
+    node::{text::create_text_impl, HTMLNode},
+    HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT,
+};
 
 use super::attribute::{AttributeBase, AttributeBaseT};
 
@@ -58,4 +63,30 @@ impl HTMLNodeInnerT for AnchorElementInner {
 mod tests {
     #[test]
     fn test_anchor() {}
+}
+
+pub(crate) fn create_anchor_impl(content: Option<&str>, href: Option<&str>) -> HTMLNode {
+    let anchor_inner = AnchorElementInner {
+        html_node_base: HTMLNodeBaseInner::default(),
+        atrr: AnchorAttribute {
+            href: {
+                if let Some(href_val) = href {
+                    Some(String::from(href_val))
+                } else {
+                    None
+                }
+            },
+            attr_base: AttributeBase::default(),
+        },
+    };
+
+    let res = HTMLNode::Element(Rc::new(RefCell::new(super::ElementInner::Anchor(
+        anchor_inner,
+    ))));
+    if let Some(cnt) = content {
+        let text_node = create_text_impl(cnt);
+        res.add_child(&text_node).expect("");
+    }
+
+    return res;
 }

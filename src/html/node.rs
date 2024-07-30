@@ -2,7 +2,7 @@ pub mod element;
 
 pub mod text;
 
-use element::ElementInner;
+use element::{anchor::create_anchor_impl, ElementInner};
 use text::{create_text_impl, TextInner};
 
 use std::{cell::RefCell, rc::Rc};
@@ -30,5 +30,9 @@ impl HTMLNodeTImpl for HTMLNode {
 impl HTMLNode {
     pub fn create_text(content: &str) -> Self {
         create_text_impl(content)
+    }
+
+    pub fn create_anchor(content: Option<&str>, href: Option<&str>) -> Self {
+        create_anchor_impl(content, href)
     }
 }
