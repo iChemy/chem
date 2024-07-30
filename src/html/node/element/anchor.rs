@@ -1,4 +1,4 @@
-use crate::html::{html_impl::HTMLNodeInnerTImpl, HTMLNodeBaseInner, HTMLNodeInnerT};
+use crate::html::{HTMLNodeBaseInner, HTMLNodeInnerT};
 
 use super::attribute::{AttributeBase, AttributeBaseT};
 
@@ -24,9 +24,7 @@ pub struct AnchorElementInner {
 
 impl AnchorElementInner {}
 
-impl HTMLNodeInnerT for AnchorElementInner {}
-
-impl HTMLNodeInnerTImpl for AnchorElementInner {
+impl HTMLNodeInnerT for AnchorElementInner {
     fn as_html_node_inner(&self) -> &HTMLNodeBaseInner {
         &self.html_node_base
     }
@@ -35,7 +33,7 @@ impl HTMLNodeInnerTImpl for AnchorElementInner {
         &mut self.html_node_base
     }
 
-    fn inner_render_impl(&self) -> String {
+    fn inner_render(&self) -> String {
         let mut res = String::from("<a");
 
         if let Some(href_val) = &self.atrr.href {

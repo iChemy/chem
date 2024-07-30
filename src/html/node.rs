@@ -7,7 +7,7 @@ use text::{create_text_impl, TextInner};
 
 use std::{cell::RefCell, rc::Rc};
 
-use super::{html_impl::HTMLNodeTImpl, HTMLNodeInnerT};
+use super::{HTMLNodeInnerT, HTMLNodeTImpl};
 
 pub enum HTMLNode {
     Text(Rc<RefCell<TextInner>>),

@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
 use anchor::AnchorElementInner;
 
-use crate::html::{html_impl::HTMLNodeInnerTImpl, HTMLNodeInnerT};
+use crate::html::HTMLNodeInnerT;
 
 pub mod anchor;
 pub mod attribute;
@@ -11,7 +9,7 @@ pub enum ElementInner {
     Anchor(AnchorElementInner),
 }
 
-impl HTMLNodeInnerTImpl for ElementInner {
+impl HTMLNodeInnerT for ElementInner {
     fn as_html_node_inner(&self) -> &crate::html::HTMLNodeBaseInner {
         match self {
             Self::Anchor(anchor_element_inner) => anchor_element_inner.as_html_node_inner(),
@@ -24,10 +22,10 @@ impl HTMLNodeInnerTImpl for ElementInner {
         }
     }
 
-    fn inner_render_impl(&self) -> String {
+    fn inner_render(&self) -> String {
         match self {
             Self::Anchor(anchor_element_inner) => {
-                return anchor_element_inner.inner_render_impl();
+                return anchor_element_inner.inner_render();
             }
 
             _ => {
@@ -36,5 +34,3 @@ impl HTMLNodeInnerTImpl for ElementInner {
         }
     }
 }
-
-impl HTMLNodeInnerT for ElementInner {}

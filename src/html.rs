@@ -1,57 +1,23 @@
-use std::{
-    cell::RefCell,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, rc::Rc};
 
-use html_impl::{HTMLNodeInnerTImpl, HTMLNodeTImpl};
+use html_private::{HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeTImpl};
 pub mod node;
 
-pub(crate) trait HTMLNodeInnerT: HTMLNodeInnerTImpl {
-    fn inner_render(&self) -> String {
-        self.inner_render_impl()
-    }
-}
-pub trait HTMLNodeT: HTMLNodeTImpl {
-    fn is_ancestor_of(&self, descendant: &impl HTMLNodeT) -> Result<bool, NodeError> {
-        let me = self.inner_ptr();
-        let descendant_ptr = descendant.inner_ptr();
-        Self::is_ancestor_of_impl(&me, &descendant_ptr)
-    }
+mod html_private {
+    use std::{
+        cell::RefCell,
+        rc::{Rc, Weak},
+    };
 
-    fn is_descendant_of(&self, ancestor: &impl HTMLNodeT) -> Result<bool, NodeError> {
-        let me = self.inner_ptr();
-        let ancestor_ptr = ancestor.inner_ptr();
-        Self::is_descendant_of_impl(&me, &ancestor_ptr)
-    }
+    use super::NodeError;
 
-    fn remove_child(&self, child: &impl HTMLNodeT) -> Result<(), NodeError> {
-        let me = self.inner_ptr();
-        let child_ptr = child.inner_ptr();
-        Self::remove_child_impl(&me, &child_ptr)
-    }
-
-    fn add_child(&self, node: &impl HTMLNodeT) -> Result<(), NodeError> {
-        let me = self.inner_ptr();
-        let you = node.inner_ptr();
-        Self::add_child_impl(me, you)
-    }
-
-    fn render(&self) -> String {
-        self.inner_ptr().borrow().inner_render()
-    }
-}
-
-mod html_impl {
-    use std::{cell::RefCell, rc::Rc};
-
-    use super::{HTMLNodeBaseInner, HTMLNodeInnerT, NodeError};
-
-    pub(crate) trait HTMLNodeInnerTImpl {
+    pub trait HTMLNodeInnerT {
+        fn inner_render(&self) -> String;
         fn as_html_node_inner(&self) -> &HTMLNodeBaseInner;
         fn as_html_node_inner_mut(&mut self) -> &mut HTMLNodeBaseInner;
-        fn inner_render_impl(&self) -> String;
     }
-    pub(crate) trait HTMLNodeTImpl {
+
+    pub trait HTMLNodeTImpl {
         fn inner_ptr(&self) -> Rc<RefCell<dyn HTMLNodeInnerT>>;
 
         fn remove_child_impl(
@@ -154,15 +120,44 @@ mod html_impl {
             return Ok(());
         }
     }
+
+    pub struct HTMLNodeBaseInner {
+        pub parent: Option<Weak<RefCell<dyn HTMLNodeInnerT>>>,
+        pub children: Vec<Rc<RefCell<dyn HTMLNodeInnerT>>>,
+        pub leaf: bool,
+    }
+}
+pub trait HTMLNodeT: HTMLNodeTImpl {
+    fn is_ancestor_of(&self, descendant: &impl HTMLNodeT) -> Result<bool, NodeError> {
+        let me = self.inner_ptr();
+        let descendant_ptr = descendant.inner_ptr();
+        Self::is_ancestor_of_impl(&me, &descendant_ptr)
+    }
+
+    fn is_descendant_of(&self, ancestor: &impl HTMLNodeT) -> Result<bool, NodeError> {
+        let me = self.inner_ptr();
+        let ancestor_ptr = ancestor.inner_ptr();
+        Self::is_descendant_of_impl(&me, &ancestor_ptr)
+    }
+
+    fn remove_child(&self, child: &impl HTMLNodeT) -> Result<(), NodeError> {
+        let me = self.inner_ptr();
+        let child_ptr = child.inner_ptr();
+        Self::remove_child_impl(&me, &child_ptr)
+    }
+
+    fn add_child(&self, node: &impl HTMLNodeT) -> Result<(), NodeError> {
+        let me = self.inner_ptr();
+        let you = node.inner_ptr();
+        Self::add_child_impl(me, you)
+    }
+
+    fn render(&self) -> String {
+        self.inner_ptr().borrow().inner_render()
+    }
 }
 struct HTMLNodeBase {
     ptr: Rc<RefCell<HTMLNodeBaseInner>>,
-}
-
-pub(crate) struct HTMLNodeBaseInner {
-    parent: Option<Weak<RefCell<dyn HTMLNodeInnerT>>>,
-    children: Vec<Rc<RefCell<dyn HTMLNodeInnerT>>>,
-    leaf: bool,
 }
 
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
@@ -187,21 +182,17 @@ impl HTMLNodeTImpl for HTMLNodeBase {
 
 impl HTMLNodeT for HTMLNodeBase {}
 
-impl HTMLNodeInnerTImpl for HTMLNodeBaseInner {
+impl HTMLNodeInnerT for HTMLNodeBaseInner {
     fn as_html_node_inner(&self) -> &HTMLNodeBaseInner {
         self
     }
-
     fn as_html_node_inner_mut(&mut self) -> &mut HTMLNodeBaseInner {
         self
     }
-
-    fn inner_render_impl(&self) -> String {
+    fn inner_render(&self) -> String {
         String::new()
     }
 }
-
-impl HTMLNodeInnerT for HTMLNodeBaseInner {}
 
 #[cfg(test)]
 mod tests {

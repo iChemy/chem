@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::html::{html_impl::HTMLNodeInnerTImpl, HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT};
+use crate::html::{HTMLNodeBaseInner, HTMLNodeInnerT, HTMLNodeT};
 
 use super::HTMLNode;
 
@@ -11,7 +11,7 @@ pub struct TextInner {
 
 impl HTMLNodeT for HTMLNode {}
 
-impl HTMLNodeInnerTImpl for TextInner {
+impl HTMLNodeInnerT for TextInner {
     fn as_html_node_inner(&self) -> &HTMLNodeBaseInner {
         &self.html_node_base
     }
@@ -20,12 +20,10 @@ impl HTMLNodeInnerTImpl for TextInner {
         &mut self.html_node_base
     }
 
-    fn inner_render_impl(&self) -> String {
+    fn inner_render(&self) -> String {
         self.content.clone()
     }
 }
-
-impl HTMLNodeInnerT for TextInner {}
 
 pub(crate) fn create_text_impl(content: &str) -> HTMLNode {
     HTMLNode::Text(Rc::new(RefCell::new(TextInner {
